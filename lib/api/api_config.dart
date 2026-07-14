@@ -6,18 +6,20 @@ import 'package:flutter/foundation.dart';
 /// Ví dụ: https://vertex-api.example.com
 /// ====================================================
 class ApiConfig {
-  // ── LOCAL DEVELOPMENT ──
-  // Đổi thành IP máy bạn nếu test trên thiết bị thật
-  // Ví dụ: static const String baseUrl = 'http://192.168.1.x:7099';
-  static String get baseUrl {
-    if (kIsWeb) {
-      return 'http://localhost:5093'; // or 7099 for HTTPS
-    }
-    return 'http://10.0.2.2:5093'; // Android Emulator
-  }
+  // Đổi isProduction = true để kết nối server thật, false để test local
+  static const bool isProduction = true;
 
-  // ── PRODUCTION ──
-  // static const String baseUrl = 'https://your-server.com';
+  static String get baseUrl {
+    if (isProduction) {
+      return 'https://vertex.io.vn';
+    }
+    
+    // LOCAL DEVELOPMENT
+    if (kIsWeb) {
+      return 'http://localhost:5093'; 
+    }
+    return 'http://10.0.2.2:5093'; 
+  }
 
   /// Có dùng mock data local không?
   /// Set = true để phát triển UI mà không cần backend
