@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
 import '../../api/project_service.dart';
+import '../../api/lecturer_service.dart';
+import '../../providers/auth_provider.dart';
+import 'package:provider/provider.dart';
 import '../../models/project.dart';
 import '../../widgets/task_status_chip.dart';
 
@@ -56,12 +59,19 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
 
     setState(() => _isSending = true);
     try {
-      final comment = await ProjectService.addComment(
-          widget.orgId, widget.projectId, _task.id, content);
-      setState(() {
-        _comments.add(comment);
+      final user = context.read<AuthProvider>().user;
+      if (user?.role == 'lecturer') {
+        await LecturerService.addComment(_task.id, content);
+        await _loadComments();
         _commentController.clear();
-      });
+      } else {
+        final comment = await ProjectService.addComment(
+            widget.orgId, widget.projectId, _task.id, content);
+        setState(() {
+          _comments.add(comment);
+          _commentController.clear();
+        });
+      }
     } catch (e) {
       debugPrint('Error: $e');
     }
@@ -80,6 +90,9 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final user = context.watch<AuthProvider>().user;
+    final isLecturer = user?.role == 'lecturer';
+
     return Scaffold(
       backgroundColor: AppColors.bgDark,
       appBar: AppBar(
@@ -116,7 +129,10 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                       _PriorityChip(priority: _task.priority),
                       const Spacer(),
                       // Status change button
-                      _buildStatusButton(),
+                      if (isLecturer && _task.status == 'ready-for-review')
+                        _buildLecturerActions()
+                      else if (!isLecturer)
+                        _buildStatusButton(),
                     ],
                   ),
                   const SizedBox(height: 20),
@@ -174,6 +190,46 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
           _buildCommentInput(),
         ],
       ),
+    );
+  }
+
+  Widget _buildLecturerActions() {
+    return Row(
+      children: [
+        ElevatedButton(
+          onPressed: () async {
+            try {
+              await LecturerService.approveTask(_task.id);
+              setState(() => _task = _task.copyWith(status: 'done'));
+            } catch (e) {
+              debugPrint('Approve error: $e');
+            }
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.statusDone,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+            minimumSize: const Size(0, 36),
+          ),
+          child: const Text('Phê duyệt', style: TextStyle(fontSize: 12)),
+        ),
+        const SizedBox(width: 8),
+        ElevatedButton(
+          onPressed: () async {
+            try {
+              await LecturerService.requestChanges(_task.id);
+              setState(() => _task = _task.copyWith(status: 'in-progress'));
+            } catch (e) {
+              debugPrint('Request changes error: $e');
+            }
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.error,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+            minimumSize: const Size(0, 36),
+          ),
+          child: const Text('Yêu cầu sửa', style: TextStyle(fontSize: 12)),
+        ),
+      ],
     );
   }
 

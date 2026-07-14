@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../api/project_service.dart';
+import '../../api/lecturer_service.dart';
 import '../../models/project.dart';
 import '../../models/organization.dart';
 import '../../widgets/project_card.dart';
@@ -31,13 +32,18 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
     try {
-      _orgs = await ProjectService.listOrgs();
-      if (_orgs.isNotEmpty) {
-        _activeOrgId = _orgs.first.id;
-        _projects = await ProjectService.listProjects(_activeOrgId!);
-        if (_projects.isNotEmpty) {
-          _activeProject = await ProjectService.getProjectDetail(
-              _activeOrgId!, _projects.first.id);
+      final user = context.read<AuthProvider>().user;
+      if (user?.role == 'lecturer') {
+        _projects = await LecturerService.getGroups();
+      } else {
+        _orgs = await ProjectService.listOrgs();
+        if (_orgs.isNotEmpty) {
+          _activeOrgId = _orgs.first.id;
+          _projects = await ProjectService.listProjects(_activeOrgId!);
+          if (_projects.isNotEmpty) {
+            _activeProject = await ProjectService.getProjectDetail(
+                _activeOrgId!, _projects.first.id);
+          }
         }
       }
     } catch (e) {
@@ -67,10 +73,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
 
                     // Stats cards
-                    SliverToBoxAdapter(child: _buildStatsRow()),
+                    if (user?.role != 'lecturer') 
+                      SliverToBoxAdapter(child: _buildStatsRow()),
 
                     // My Tasks Today
-                    SliverToBoxAdapter(child: _buildMyTasksSection()),
+                    if (user?.role != 'lecturer')
+                      SliverToBoxAdapter(child: _buildMyTasksSection()),
 
                     // Projects
                     SliverToBoxAdapter(child: _buildProjectsSection()),
@@ -326,14 +334,17 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildProjectsSection() {
+    final user = context.watch<AuthProvider>().user;
+    final title = user?.role == 'lecturer' ? 'Các nhóm hướng dẫn' : 'Dự án';
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Dự án',
-            style: TextStyle(
+          Text(
+            title,
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w700,
               color: AppColors.textPrimary,

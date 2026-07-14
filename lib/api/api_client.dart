@@ -44,7 +44,7 @@ class ApiClient {
   static Future<http.Response> request(
     String method,
     String path, {
-    Map<String, dynamic>? body,
+    dynamic body,
     Map<String, String>? extraHeaders,
     bool isAuthPath = false,
   }) async {

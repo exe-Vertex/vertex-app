@@ -2,9 +2,78 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
+import '../../api/skill_service.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  List<String> _skills = [];
+  bool _isLoadingSkills = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSkills();
+  }
+
+  Future<void> _loadSkills() async {
+    try {
+      final skills = await SkillService.getSkills();
+      if (mounted) {
+        setState(() {
+          _skills = skills;
+          _isLoadingSkills = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoadingSkills = false);
+      }
+    }
+  }
+
+  void _showEditSkillsDialog() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.bgSurface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(ctx).viewInsets.bottom,
+        ),
+        child: _EditSkillsSheet(
+          initialSkills: _skills,
+          onSaved: (newSkills) async {
+            setState(() => _isLoadingSkills = true);
+            try {
+              await SkillService.updateSkills(newSkills);
+              if (mounted) {
+                setState(() {
+                  _skills = newSkills;
+                  _isLoadingSkills = false;
+                });
+              }
+            } catch (e) {
+              if (mounted) {
+                setState(() => _isLoadingSkills = false);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Không thể cập nhật kỹ năng')),
+                );
+              }
+            }
+          },
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -97,11 +166,60 @@ class ProfileScreen extends StatelessWidget {
               ),
               const SizedBox(height: 32),
 
+              // Skills Section
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Kỹ năng',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: _showEditSkillsDialog,
+                      child: const Text('Chỉnh sửa'),
+                    )
+                  ],
+                ),
+              ),
+              const SizedBox(height: 8),
+              if (_isLoadingSkills)
+                const CircularProgressIndicator()
+              else if (_skills.isEmpty)
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Chưa có kỹ năng nào. Bấm Chỉnh sửa để thêm.',
+                    style: TextStyle(color: AppColors.textSecondary),
+                  ),
+                )
+              else
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: _skills.map((skill) => Chip(
+                      label: Text(skill, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                      backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                      side: BorderSide.none,
+                      labelStyle: const TextStyle(color: AppColors.primary),
+                    )).toList(),
+                  ),
+                ),
+              
+              const SizedBox(height: 32),
+
               // Menu items
               _buildMenuItem(
                 icon: Icons.person_outline,
                 label: 'Chỉnh sửa hồ sơ',
-                onTap: () {},
+                onTap: () {}, // Not implemented yet per user choice
               ),
               _buildMenuItem(
                 icon: Icons.notifications_outlined,
@@ -213,7 +331,7 @@ class ProfileScreen extends StatelessWidget {
             ),
             ?trailing,
             if (trailing == null)
-              Icon(Icons.chevron_right,
+              const Icon(Icons.chevron_right,
                   size: 18, color: AppColors.textMuted),
           ],
         ),
@@ -252,6 +370,126 @@ class ProfileScreen extends StatelessWidget {
               backgroundColor: AppColors.error,
             ),
             child: const Text('Đăng xuất'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _EditSkillsSheet extends StatefulWidget {
+  final List<String> initialSkills;
+  final Function(List<String>) onSaved;
+
+  const _EditSkillsSheet({required this.initialSkills, required this.onSaved});
+
+  @override
+  State<_EditSkillsSheet> createState() => _EditSkillsSheetState();
+}
+
+class _EditSkillsSheetState extends State<_EditSkillsSheet> {
+  late List<String> _currentSkills;
+  final TextEditingController _controller = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _currentSkills = List.from(widget.initialSkills);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _addSkill(String skill) {
+    final s = skill.trim();
+    if (s.isNotEmpty && !_currentSkills.contains(s)) {
+      setState(() {
+        _currentSkills.add(s);
+        _controller.clear();
+      });
+    }
+  }
+
+  void _removeSkill(String skill) {
+    setState(() {
+      _currentSkills.remove(skill);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Chỉnh sửa Kỹ năng',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () => Navigator.pop(context),
+              )
+            ],
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _controller,
+            style: const TextStyle(color: AppColors.textPrimary),
+            decoration: InputDecoration(
+              hintText: 'Nhập tên kỹ năng (VD: Flutter) và nhấn Xong',
+              hintStyle: const TextStyle(color: AppColors.textMuted),
+              filled: true,
+              fillColor: AppColors.bgInput,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              suffixIcon: IconButton(
+                icon: const Icon(Icons.add, color: AppColors.primary),
+                onPressed: () => _addSkill(_controller.text),
+              ),
+            ),
+            onSubmitted: _addSkill,
+          ),
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: _currentSkills.map((skill) => Chip(
+              label: Text(skill, style: const TextStyle(fontSize: 13)),
+              backgroundColor: AppColors.bgInput,
+              deleteIcon: const Icon(Icons.close, size: 16),
+              onDeleted: () => _removeSkill(skill),
+              side: BorderSide.none,
+            )).toList(),
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              backgroundColor: AppColors.primary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            onPressed: () {
+              widget.onSaved(_currentSkills);
+              Navigator.pop(context);
+            },
+            child: const Text('Lưu thay đổi', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
