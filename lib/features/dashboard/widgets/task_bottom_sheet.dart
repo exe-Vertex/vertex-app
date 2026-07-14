@@ -193,9 +193,9 @@ class _TaskBottomSheetState extends State<TaskBottomSheet> {
               padding: const EdgeInsets.symmetric(vertical: 4.0),
               child: Row(
                 children: [
-                  InkWell(
-                    onTap: () => provider.toggleSubtask(st.id, !st.isCompleted),
-                    child: Icon(
+                  IconButton(
+                    onPressed: () => provider.toggleSubtask(st.id, !st.isCompleted),
+                    icon: Icon(
                       st.isCompleted
                           ? Icons.check_circle
                           : Icons.radio_button_unchecked,
@@ -204,6 +204,8 @@ class _TaskBottomSheetState extends State<TaskBottomSheet> {
                           : Colors.grey[600],
                       size: 20,
                     ),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
                   ),
                   const SizedBox(width: 12),
                   Expanded(

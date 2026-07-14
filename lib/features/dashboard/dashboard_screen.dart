@@ -32,12 +32,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
     });
   }
 
-  final List<Widget> _tabs = [
-    const OverviewTab(),
-    const ProjectsTab(),
-    const MembersTab(),
-    const SettingsTab(),
-  ];
+  void _onTabTapped(int index) {
+    setState(() => _currentIndex = index);
+  }
 
   void _showAiChat(BuildContext context, String? orgId) {
     showModalBottomSheet(
@@ -55,6 +52,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final activeProject = workspaceProvider.activeWorkspaceProjects
         .where((p) => p.id == workspaceProvider.activeProjectId)
         .firstOrNull;
+
+    final List<Widget> tabs = [
+      const OverviewTab(),
+      ProjectsTab(onProjectSelected: () => _onTabTapped(0)),
+      const MembersTab(),
+      const SettingsTab(),
+    ];
 
     return Scaffold(
       appBar: AppBar(
@@ -90,7 +94,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ],
       ),
-      drawer: const AppDrawer(),
+      drawer: AppDrawer(onProjectSelected: () => _onTabTapped(0)),
       body: workspaceProvider.isLoading
           ? const Center(child: CircularProgressIndicator())
           : workspaceProvider.errorMessage != null
@@ -100,7 +104,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 style: const TextStyle(color: Colors.red),
               ),
             )
-          : _tabs[_currentIndex],
+          : tabs[_currentIndex],
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAiChat(context, activeWorkspace?.id),
         backgroundColor: Theme.of(

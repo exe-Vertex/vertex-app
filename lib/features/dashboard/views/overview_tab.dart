@@ -53,11 +53,19 @@ class OverviewTab extends StatelessWidget {
     }
 
     final tasks = taskProvider.tasks;
-    final todoTasks = tasks.where((t) => t.status == 'Todo').toList();
+    final todoTasks = tasks.where((t) => t.status.toLowerCase() == 'todo').toList();
     final inProgressTasks = tasks
-        .where((t) => t.status == 'In Progress')
+        .where((t) => t.status.toLowerCase() == 'in progress' || t.status.toLowerCase() == 'in-progress')
         .toList();
-    final doneTasks = tasks.where((t) => t.status == 'Done').toList();
+    final doneTasks = tasks.where((t) => t.status.toLowerCase() == 'done').toList();
+    
+    // Catch-all for tasks with unrecognized statuses
+    final otherTasks = tasks.where((t) => 
+      t.status.toLowerCase() != 'todo' && 
+      t.status.toLowerCase() != 'in progress' && 
+      t.status.toLowerCase() != 'in-progress' && 
+      t.status.toLowerCase() != 'done'
+    ).toList();
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
@@ -93,6 +101,12 @@ class OverviewTab extends StatelessWidget {
           if (doneTasks.isNotEmpty) ...[
             _buildSectionTitle('Done'),
             ...doneTasks.map((t) => _buildTaskCard(context, t)),
+            const SizedBox(height: 16),
+          ],
+          
+          if (otherTasks.isNotEmpty) ...[
+            _buildSectionTitle('Other Statuses'),
+            ...otherTasks.map((t) => _buildTaskCard(context, t)),
           ],
         ],
       ),
@@ -151,11 +165,19 @@ class OverviewTab extends StatelessWidget {
           padding: const EdgeInsets.all(16.0),
           child: Row(
             children: [
-              Icon(
-                task.status == 'Done'
-                    ? Icons.check_circle
-                    : Icons.circle_outlined,
-                color: task.status == 'Done' ? Colors.green : Colors.grey[400],
+              IconButton(
+                icon: Icon(
+                  task.status == 'Done'
+                      ? Icons.check_circle
+                      : Icons.circle_outlined,
+                  color: task.status == 'Done' ? Colors.green : Colors.grey[400],
+                ),
+                onPressed: () {
+                  final newStatus = task.status == 'Done' ? 'Todo' : 'Done';
+                  context.read<TaskProvider>().updateTaskStatus(task.id, newStatus);
+                },
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
               ),
               const SizedBox(width: 12),
               Expanded(

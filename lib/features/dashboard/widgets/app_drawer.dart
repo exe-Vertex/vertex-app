@@ -4,7 +4,9 @@ import '../../../core/providers/workspace_provider.dart';
 import 'package:go_router/go_router.dart';
 
 class AppDrawer extends StatelessWidget {
-  const AppDrawer({super.key});
+  final VoidCallback? onProjectSelected;
+
+  const AppDrawer({super.key, this.onProjectSelected});
 
   @override
   Widget build(BuildContext context) {
@@ -146,6 +148,7 @@ class AppDrawer extends StatelessWidget {
                     onTap: () {
                       workspaceProvider.selectProject(project.id);
                       Navigator.pop(context); // Close drawer after selection
+                      onProjectSelected?.call(); // Navigate to overview tab
                     },
                   );
                 },

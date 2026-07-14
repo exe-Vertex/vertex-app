@@ -3,7 +3,9 @@ import 'package:provider/provider.dart';
 import '../../../core/providers/workspace_provider.dart';
 
 class ProjectsTab extends StatelessWidget {
-  const ProjectsTab({super.key});
+  final VoidCallback? onProjectSelected;
+
+  const ProjectsTab({super.key, this.onProjectSelected});
 
   @override
   Widget build(BuildContext context) {
@@ -35,6 +37,7 @@ class ProjectsTab extends StatelessWidget {
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               context.read<WorkspaceProvider>().selectProject(project.id);
+              onProjectSelected?.call();
             },
           ),
         );
