@@ -9,9 +9,10 @@ class AiService {
   }
 
   Future<dynamic> chat(String prompt, String? orgId) async {
-    return await _apiClient.post(
-      '/ai/chat',
-      body: {'prompt': prompt, if (orgId != null) 'orgId': orgId},
-    );
+    final body = <String, dynamic>{'prompt': prompt};
+    if (orgId != null) {
+      body['orgId'] = orgId;
+    }
+    return await _apiClient.post('/ai/chat', body: body);
   }
 }
