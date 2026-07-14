@@ -18,9 +18,9 @@ class TaskStatusChip extends StatelessWidget {
         vertical: small ? 3 : 5,
       ),
       decoration: BoxDecoration(
-        color: config.color.withOpacity(0.12),
+        color: config.color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(small ? 4 : 6),
-        border: Border.all(color: config.color.withOpacity(0.25)),
+        border: Border.all(color: config.color.withValues(alpha: 0.25)),
       ),
       child: Text(
         config.label,

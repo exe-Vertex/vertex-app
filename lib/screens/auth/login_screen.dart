@@ -95,16 +95,16 @@ class _LoginScreenState extends State<LoginScreen>
 
                 // Error message
                 Consumer<AuthProvider>(
-                  builder: (_, auth, __) {
+                  builder: (_, auth, _) {
                     if (auth.error != null) {
                       return Container(
                         margin: const EdgeInsets.only(bottom: 16),
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: AppColors.error.withOpacity(0.1),
+                          color: AppColors.error.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(AppRadius.sm),
                           border:
-                              Border.all(color: AppColors.error.withOpacity(0.3)),
+                              Border.all(color: AppColors.error.withValues(alpha: 0.3)),
                         ),
                         child: Text(
                           auth.error!,
@@ -140,7 +140,7 @@ class _LoginScreenState extends State<LoginScreen>
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: AppColors.primary.withOpacity(0.3),
+                color: AppColors.primary.withValues(alpha: 0.3),
                 blurRadius: 24,
                 offset: const Offset(0, 8),
               ),
@@ -333,7 +333,7 @@ class _LoginScreenState extends State<LoginScreen>
 
   Widget _buildSubmitButton() {
     return Consumer<AuthProvider>(
-      builder: (_, auth, __) {
+      builder: (_, auth, _) {
         return SizedBox(
           height: 52,
           child: ElevatedButton(

@@ -215,11 +215,11 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen>
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
           child: Row(
             children: [
-              _FilterChip('Tất cả', 'all'),
-              _FilterChip('Todo', 'todo'),
-              _FilterChip('In Progress', 'in-progress'),
-              _FilterChip('Review', 'ready-for-review'),
-              _FilterChip('Done', 'done'),
+              _filterChip('Tất cả', 'all'),
+              _filterChip('Todo', 'todo'),
+              _filterChip('In Progress', 'in-progress'),
+              _filterChip('Review', 'ready-for-review'),
+              _filterChip('Done', 'done'),
             ],
           ),
         ),
@@ -239,7 +239,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen>
     );
   }
 
-  Widget _FilterChip(String label, String status) {
+  Widget _filterChip(String label, String status) {
     final isActive = _filterStatus == status;
     return Padding(
       padding: const EdgeInsets.only(right: 8),
@@ -249,12 +249,12 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen>
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
           decoration: BoxDecoration(
             color: isActive
-                ? AppColors.primary.withOpacity(0.15)
+                ? AppColors.primary.withValues(alpha: 0.15)
                 : AppColors.bgSurface,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color:
-                  isActive ? AppColors.primary.withOpacity(0.4) : AppColors.border,
+                  isActive ? AppColors.primary.withValues(alpha: 0.4) : AppColors.border,
             ),
           ),
           child: Text(
@@ -348,7 +348,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen>
                     width: 26,
                     height: 26,
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.15),
+                      color: AppColors.primary.withValues(alpha: 0.15),
                       shape: BoxShape.circle,
                     ),
                     child: Center(
@@ -393,10 +393,10 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen>
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
-                  color: s.$3.withOpacity(0.1),
+                  color: s.$3.withValues(alpha: 0.1),
                   borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(10)),
-                  border: Border.all(color: s.$3.withOpacity(0.2)),
+                  border: Border.all(color: s.$3.withValues(alpha: 0.2)),
                 ),
                 child: Row(
                   children: [
@@ -422,7 +422,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen>
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 2),
                       decoration: BoxDecoration(
-                        color: s.$3.withOpacity(0.15),
+                        color: s.$3.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Text(
@@ -441,7 +441,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen>
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
-                    color: AppColors.bgCard.withOpacity(0.5),
+                    color: AppColors.bgCard.withValues(alpha: 0.5),
                     borderRadius: const BorderRadius.vertical(
                         bottom: Radius.circular(10)),
                     border: Border.all(color: AppColors.border),
@@ -491,7 +491,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen>
                   padding:
                       const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: _priorityColor(task.priority).withOpacity(0.12),
+                    color: _priorityColor(task.priority).withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
@@ -524,7 +524,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen>
                     width: 22,
                     height: 22,
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.15),
+                      color: AppColors.primary.withValues(alpha: 0.15),
                       shape: BoxShape.circle,
                     ),
                     child: Center(
@@ -614,7 +614,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen>
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   color: member.role == 'Leader'
-                      ? AppColors.primary.withOpacity(0.12)
+                      ? AppColors.primary.withValues(alpha: 0.12)
                       : AppColors.bgInput,
                   borderRadius: BorderRadius.circular(20),
                 ),

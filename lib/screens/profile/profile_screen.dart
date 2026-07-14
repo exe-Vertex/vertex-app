@@ -42,7 +42,7 @@ class ProfileScreen extends StatelessWidget {
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.primary.withOpacity(0.3),
+                      color: AppColors.primary.withValues(alpha: 0.3),
                       blurRadius: 20,
                       offset: const Offset(0, 6),
                     ),
@@ -83,7 +83,7 @@ class ProfileScreen extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.12),
+                  color: AppColors.primary.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
@@ -199,7 +199,7 @@ class ProfileScreen extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(icon, size: 20, color: itemColor.withOpacity(0.7)),
+            Icon(icon, size: 20, color: itemColor.withValues(alpha: 0.7)),
             const SizedBox(width: 14),
             Expanded(
               child: Text(
@@ -211,7 +211,7 @@ class ProfileScreen extends StatelessWidget {
                 ),
               ),
             ),
-            if (trailing != null) trailing,
+            ?trailing,
             if (trailing == null)
               Icon(Icons.chevron_right,
                   size: 18, color: AppColors.textMuted),

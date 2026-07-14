@@ -1,4 +1,3 @@
-import 'user.dart';
 
 /// Project summary (list view)
 class ProjectSummary {

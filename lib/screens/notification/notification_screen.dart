@@ -145,12 +145,12 @@ class _NotificationScreenState extends State<NotificationScreen> {
         decoration: BoxDecoration(
           color: notification.isRead
               ? AppColors.bgSurface
-              : AppColors.bgSurface.withOpacity(0.9),
+              : AppColors.bgSurface.withValues(alpha: 0.9),
           borderRadius: BorderRadius.circular(AppRadius.md),
           border: Border.all(
             color: notification.isRead
                 ? AppColors.border
-                : config.color.withOpacity(0.3),
+                : config.color.withValues(alpha: 0.3),
           ),
         ),
         child: Row(
@@ -161,7 +161,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
               width: 38,
               height: 38,
               decoration: BoxDecoration(
-                color: config.color.withOpacity(0.12),
+                color: config.color.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(config.icon, color: config.color, size: 18),
@@ -219,7 +219,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.notifications_none,
-              size: 64, color: AppColors.textMuted.withOpacity(0.3)),
+              size: 64, color: AppColors.textMuted.withValues(alpha: 0.3)),
           const SizedBox(height: 16),
           const Text(
             'Không có thông báo',
