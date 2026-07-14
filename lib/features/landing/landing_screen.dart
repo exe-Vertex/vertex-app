@@ -1,8 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-class LandingScreen extends StatelessWidget {
+import 'package:shared_preferences/shared_preferences.dart';
+
+class LandingScreen extends StatefulWidget {
   const LandingScreen({super.key});
+
+  @override
+  State<LandingScreen> createState() => _LandingScreenState();
+}
+
+class _LandingScreenState extends State<LandingScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _checkLogin();
+  }
+
+  void _checkLogin() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.getString('auth_token') != null) {
+      if (mounted) context.go('/dashboard');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
