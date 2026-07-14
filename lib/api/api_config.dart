@@ -11,7 +11,7 @@ class ApiConfig {
 
   static String get baseUrl {
     if (isProduction) {
-      return 'https://vertex.io.vn';
+      return 'https://api.vertex.io.vn';
     }
     
     // LOCAL DEVELOPMENT
