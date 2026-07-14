@@ -8,6 +8,7 @@ import '../../models/project.dart';
 import '../../models/organization.dart';
 import '../../widgets/project_card.dart';
 import '../../widgets/task_status_chip.dart';
+import '../../widgets/shimmer_loading.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -26,7 +27,9 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _loadData();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadData();
+    });
   }
 
   Future<void> _loadData() async {
@@ -59,8 +62,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       body: SafeArea(
         child: _isLoading
-            ? const Center(
-                child: CircularProgressIndicator(color: AppColors.primary))
+            ? _buildLoadingState()
             : RefreshIndicator(
                 color: AppColors.primary,
                 backgroundColor: AppColors.bgCard,
@@ -80,8 +82,33 @@ class _HomeScreenState extends State<HomeScreen> {
                     if (user?.role != 'lecturer')
                       SliverToBoxAdapter(child: _buildMyTasksSection()),
 
-                    // Projects
-                    SliverToBoxAdapter(child: _buildProjectsSection()),
+                    // Projects Header
+                    SliverToBoxAdapter(child: _buildProjectsHeader()),
+
+                    // Projects List
+                    SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          final project = _projects[index];
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            child: ProjectCard(
+                              project: project,
+                              onTap: () {
+                                Navigator.of(context).pushNamed(
+                                  '/project-detail',
+                                  arguments: {
+                                    'orgId': _activeOrgId ?? '',
+                                    'projectId': project.id,
+                                  },
+                                );
+                              },
+                            ),
+                          );
+                        },
+                        childCount: _projects.length,
+                      ),
+                    ),
 
                     // Bottom padding
                     const SliverToBoxAdapter(
@@ -89,6 +116,79 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
               ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header Shimmer
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ShimmerLoading.text(width: 100, height: 14),
+                      const SizedBox(height: 8),
+                      ShimmerLoading.text(width: 150, height: 26),
+                    ],
+                  ),
+                ),
+                ShimmerLoading.box(width: 60, height: 32),
+              ],
+            ),
+          ),
+          
+          // Stats Shimmer
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+            child: Row(
+              children: List.generate(
+                4,
+                (index) => Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.only(right: index < 3 ? 10.0 : 0),
+                    child: ShimmerLoading.statCard(),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          
+          // Tasks Shimmer
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ShimmerLoading.text(width: 120, height: 20),
+                const SizedBox(height: 12),
+                ShimmerLoading.taskItem(),
+                ShimmerLoading.taskItem(),
+              ],
+            ),
+          ),
+          
+          // Projects Shimmer
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ShimmerLoading.text(width: 100, height: 20),
+                const SizedBox(height: 12),
+                ShimmerLoading.projectCard(),
+                ShimmerLoading.projectCard(),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -333,37 +433,19 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildProjectsSection() {
+  Widget _buildProjectsHeader() {
     final user = context.watch<AuthProvider>().user;
     final title = user?.role == 'lecturer' ? 'Các nhóm hướng dẫn' : 'Dự án';
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 12),
-          ..._projects.map((project) => ProjectCard(
-                project: project,
-                onTap: () {
-                  Navigator.of(context).pushNamed(
-                    '/project-detail',
-                    arguments: {
-                      'orgId': _activeOrgId,
-                      'projectId': project.id,
-                    },
-                  );
-                },
-              )),
-        ],
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+      child: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
+          color: AppColors.textPrimary,
+        ),
       ),
     );
   }

@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
 import '../../api/project_service.dart';
+import '../../api/lecturer_service.dart';
+import '../../providers/auth_provider.dart';
+import 'package:provider/provider.dart';
 import '../../models/project.dart';
 import '../../widgets/task_status_chip.dart';
+import '../../widgets/shimmer_loading.dart';
+import 'widgets/project_members_list.dart';
 
 class ProjectDetailScreen extends StatefulWidget {
   final String orgId;
@@ -29,7 +34,9 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    _loadProject();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadProject();
+    });
   }
 
   @override
@@ -41,8 +48,13 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen>
   Future<void> _loadProject() async {
     setState(() => _isLoading = true);
     try {
-      _project = await ProjectService.getProjectDetail(
-          widget.orgId, widget.projectId);
+      final user = context.read<AuthProvider>().user;
+      if (user?.role == 'lecturer') {
+        _project = await LecturerService.getGroupDetail(widget.projectId);
+      } else {
+        _project = await ProjectService.getProjectDetail(
+            widget.orgId, widget.projectId);
+      }
     } catch (e) {
       debugPrint('Error: $e');
     }
@@ -67,8 +79,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen>
         ),
       ),
       body: _isLoading
-          ? const Center(
-              child: CircularProgressIndicator(color: AppColors.primary))
+          ? _buildLoadingState()
           : _project == null
               ? const Center(child: Text('Không tìm thấy dự án'))
               : Column(
@@ -105,12 +116,45 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen>
                         children: [
                           _buildTaskList(),
                           _buildKanbanView(),
-                          _buildMembersList(),
+                          ProjectMembersList(members: _project!.members),
                         ],
                       ),
                     ),
                   ],
                 ),
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          // Header Shimmer
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: ShimmerLoading.box(width: double.infinity, height: 120),
+          ),
+          
+          // Tabs Shimmer
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: ShimmerLoading.box(width: double.infinity, height: 48),
+          ),
+          const SizedBox(height: 20),
+          
+          // Tasks Shimmer
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              children: [
+                ShimmerLoading.taskItem(),
+                ShimmerLoading.taskItem(),
+                ShimmerLoading.taskItem(),
+              ],
+            ),
+          )
+        ],
+      ),
     );
   }
 
@@ -549,90 +593,6 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen>
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildMembersList() {
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: _project!.members.length,
-      itemBuilder: (context, index) {
-        final member = _project!.members[index];
-        return Container(
-          margin: const EdgeInsets.only(bottom: 10),
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: AppColors.bgSurface,
-            borderRadius: BorderRadius.circular(AppRadius.md),
-            border: Border.all(color: AppColors.border),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  gradient: AppColors.accentGradient,
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: Text(
-                    member.initials,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      member.name,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    Text(
-                      member.email,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: AppColors.textMuted,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: member.role == 'Leader'
-                      ? AppColors.primary.withValues(alpha: 0.12)
-                      : AppColors.bgInput,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  member.role,
-                  style: TextStyle(
-                    color: member.role == 'Leader'
-                        ? AppColors.primary
-                        : AppColors.textSecondary,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
     );
   }
 

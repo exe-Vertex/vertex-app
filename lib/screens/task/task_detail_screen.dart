@@ -6,6 +6,8 @@ import '../../providers/auth_provider.dart';
 import 'package:provider/provider.dart';
 import '../../models/project.dart';
 import '../../widgets/task_status_chip.dart';
+import 'widgets/subtasks_section.dart';
+import 'widgets/comments_section.dart';
 
 class TaskDetailScreen extends StatefulWidget {
   final String orgId;
@@ -34,7 +36,9 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   void initState() {
     super.initState();
     _task = widget.task;
-    _loadComments();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadComments();
+    });
   }
 
   @override
@@ -45,8 +49,13 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
 
   Future<void> _loadComments() async {
     try {
-      _comments = await ProjectService.listComments(
-          widget.orgId, widget.projectId, _task.id);
+      final user = context.read<AuthProvider>().user;
+      if (user?.role == 'lecturer') {
+        _comments = []; // No API for lecturer to get comments yet
+      } else {
+        _comments = await ProjectService.listComments(
+            widget.orgId, widget.projectId, _task.id);
+      }
     } catch (e) {
       debugPrint('Error loading comments: $e');
     }
@@ -175,12 +184,16 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
 
                   // Subtasks
                   if (_task.subtasks.isNotEmpty) ...[
-                    _buildSubtasksSection(),
+                    SubtasksSection(subtasks: _task.subtasks),
                     const SizedBox(height: 20),
                   ],
 
                   // Comments
-                  _buildCommentsSection(),
+                  CommentsSection(
+                    comments: _comments,
+                    isLoading: _isLoadingComments,
+                    currentUserId: context.read<AuthProvider>().user?.id ?? '',
+                  ),
                 ],
               ),
             ),
@@ -324,172 +337,6 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
             icon: Icons.event_outlined,
             label: 'Deadline',
             value: _formatDate(_task.endDate),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSubtasksSection() {
-    final completed = _task.subtasks.where((s) => s.isCompleted).length;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            const Text(
-              'Subtasks',
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              '$completed/${_task.subtasks.length}',
-              style: const TextStyle(fontSize: 13, color: AppColors.textMuted),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        ...(_task.subtasks.map((subtask) => Container(
-              margin: const EdgeInsets.only(bottom: 6),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              decoration: BoxDecoration(
-                color: AppColors.bgSurface,
-                borderRadius: BorderRadius.circular(AppRadius.sm),
-                border: Border.all(color: AppColors.border),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    subtask.isCompleted
-                        ? Icons.check_circle
-                        : Icons.radio_button_unchecked,
-                    size: 20,
-                    color: subtask.isCompleted
-                        ? AppColors.primary
-                        : AppColors.textMuted,
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      subtask.title,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: subtask.isCompleted
-                            ? AppColors.textMuted
-                            : AppColors.textPrimary,
-                        decoration: subtask.isCompleted
-                            ? TextDecoration.lineThrough
-                            : null,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ))),
-      ],
-    );
-  }
-
-  Widget _buildCommentsSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Comments (${_comments.length})',
-          style: const TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        const SizedBox(height: 12),
-        if (_isLoadingComments)
-          const Center(
-              child: CircularProgressIndicator(color: AppColors.primary))
-        else if (_comments.isEmpty)
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: AppColors.bgSurface,
-              borderRadius: BorderRadius.circular(AppRadius.md),
-              border: Border.all(color: AppColors.border),
-            ),
-            child: const Center(
-              child: Text(
-                'Chưa có comment nào',
-                style: TextStyle(color: AppColors.textMuted, fontSize: 13),
-              ),
-            ),
-          )
-        else
-          ..._comments.map((comment) => _buildCommentItem(comment)),
-      ],
-    );
-  }
-
-  Widget _buildCommentItem(TaskComment comment) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.bgSurface,
-        borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 30,
-                height: 30,
-                decoration: BoxDecoration(
-                  color: AppColors.info.withValues(alpha: 0.15),
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: Text(
-                    comment.userName.isNotEmpty
-                        ? comment.userName[0].toUpperCase()
-                        : '?',
-                    style: const TextStyle(
-                      color: AppColors.info,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                comment.userName,
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              const Spacer(),
-              Text(
-                _formatDate(comment.createdAt),
-                style:
-                    const TextStyle(fontSize: 11, color: AppColors.textMuted),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            comment.content,
-            style: const TextStyle(
-              fontSize: 13,
-              color: AppColors.textSecondary,
-              height: 1.4,
-            ),
           ),
         ],
       ),

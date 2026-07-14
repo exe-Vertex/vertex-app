@@ -21,6 +21,23 @@ class LecturerService {
     }
   }
 
+  /// Lấy chi tiết một nhóm hướng dẫn
+  static Future<ProjectDetail> getGroupDetail(String projectId) async {
+    if (ApiConfig.useMockData) {
+      await Future.delayed(const Duration(milliseconds: 500));
+      throw Exception('Mock data not supported for group detail');
+    }
+
+    final response = await ApiClient.request('GET', '/api/lecturer/groups/$projectId');
+    
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final json = jsonDecode(response.body);
+      return ProjectDetail.fromJson(json);
+    } else {
+      throw Exception('Failed to load group detail');
+    }
+  }
+
   /// Phê duyệt một Task
   static Future<void> approveTask(String taskId) async {
     if (ApiConfig.useMockData) {
