@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import '../models/user.dart';
 import '../api/auth_service.dart';
 import '../api/api_client.dart';
@@ -53,6 +54,57 @@ class AuthProvider extends ChangeNotifier {
       return true;
     } catch (e) {
       _error = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// Login with Google
+  Future<bool> loginWithGoogle() async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final GoogleSignIn googleSignIn = GoogleSignIn(
+        scopes: ['email', 'profile'],
+      );
+
+      // Trigger the authentication flow
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+
+      if (googleUser == null) {
+        // User canceled the sign-in flow
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+
+      // Obtain the auth details from the request
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+      final token = googleAuth.idToken ?? googleAuth.accessToken;
+
+      if (token == null) {
+        throw Exception('Không thể lấy được mã xác thực từ Google.');
+      }
+
+      final tokens = await AuthService.externalLogin('Google', token);
+      
+      await ApiClient.saveTokens(
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+      );
+      
+      _user = await AuthService.getMe();
+      _isAuthenticated = true;
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      debugPrint('Google Sign-In Error: $e');
+      _error = 'Đăng nhập Google thất bại. Vui lòng kiểm tra lại cấu hình.';
       _isLoading = false;
       notifyListeners();
       return false;

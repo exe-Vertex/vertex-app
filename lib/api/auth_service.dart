@@ -46,6 +46,22 @@ class AuthService {
     return ApiClient.parseResponse(response, (json) => AuthTokens.fromJson(json));
   }
 
+  /// External Login (Google/GitHub)
+  static Future<AuthTokens> externalLogin(String provider, String token) async {
+    if (ApiConfig.useMockData) {
+      await Future.delayed(const Duration(milliseconds: 800));
+      return MockData.mockTokens;
+    }
+
+    final response = await ApiClient.request(
+      'POST',
+      '/api/auth/external-login',
+      body: {'provider': provider, 'token': token},
+      isAuthPath: true,
+    );
+    return ApiClient.parseResponse(response, (json) => AuthTokens.fromJson(json));
+  }
+
   /// Get current user
   static Future<User> getMe() async {
     if (ApiConfig.useMockData) {
