@@ -1,28 +1,28 @@
 import 'dart:convert';
-import '../models/project.dart';
+import '../models/lecturer.dart';
 import 'api_client.dart';
 import 'api_config.dart';
 
 class LecturerService {
   /// Lấy danh sách các nhóm sinh viên (projects) mà giảng viên phụ trách
-  static Future<List<ProjectSummary>> getGroups() async {
+  static Future<List<LecturerGroup>> getGroups() async {
     if (ApiConfig.useMockData) {
       await Future.delayed(const Duration(milliseconds: 500));
-      return [];
+      return []; // Implement mock if needed
     }
 
     final response = await ApiClient.request('GET', '/api/lecturer/groups');
     
     if (response.statusCode >= 200 && response.statusCode < 300) {
       final List<dynamic> data = jsonDecode(response.body);
-      return data.map((json) => ProjectSummary.fromJson(json)).toList();
+      return data.map((json) => LecturerGroup.fromJson(json)).toList();
     } else {
       throw Exception('Failed to load student groups');
     }
   }
 
   /// Lấy chi tiết một nhóm hướng dẫn
-  static Future<ProjectDetail> getGroupDetail(String projectId) async {
+  static Future<LecturerGroupDetail> getGroupDetail(String projectId) async {
     if (ApiConfig.useMockData) {
       await Future.delayed(const Duration(milliseconds: 500));
       throw Exception('Mock data not supported for group detail');
@@ -32,7 +32,7 @@ class LecturerService {
     
     if (response.statusCode >= 200 && response.statusCode < 300) {
       final json = jsonDecode(response.body);
-      return ProjectDetail.fromJson(json);
+      return LecturerGroupDetail.fromJson(json);
     } else {
       throw Exception('Failed to load group detail');
     }
