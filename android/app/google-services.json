@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "230923681741",
+    "project_id": "vertex-240fe",
+    "storage_bucket": "vertex-240fe.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:230923681741:android:4da3be1077654b6fc74e84",
+        "android_client_info": {
+          "package_name": "com.vertex.vertex_mobile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "230923681741-6jgq3uvdo1079tsu9acho3phpk79ra7g.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.vertex.vertex_mobile",
+            "certificate_hash": "f2a1f654c4569da2d3d9b81bcae54362b9be1b05"
+          }
+        },
+        {
+          "client_id": "230923681741-pjmi7c6l0g5fplo1a1melmvqcqbupsg3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAOVrSZY4mfxW9r_P1EHPa8B8FPjMbXvIU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "230923681741-pjmi7c6l0g5fplo1a1melmvqcqbupsg3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

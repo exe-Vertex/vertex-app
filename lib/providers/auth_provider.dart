@@ -3,6 +3,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import '../models/user.dart';
 import '../api/auth_service.dart';
 import '../api/api_client.dart';
+import '../api/api_config.dart';
 
 class AuthProvider extends ChangeNotifier {
   User? _user;
@@ -67,8 +68,24 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
+      if (ApiConfig.useMockData) {
+        // Giả lập luồng đăng nhập Google nếu dùng Mock Data
+        await Future.delayed(const Duration(milliseconds: 1500));
+        final tokens = await AuthService.externalLogin('Google', 'mock_token');
+        await ApiClient.saveTokens(
+          accessToken: tokens.accessToken,
+          refreshToken: tokens.refreshToken,
+        );
+        _user = await AuthService.getMe();
+        _isAuthenticated = true;
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      }
+
       final GoogleSignIn googleSignIn = GoogleSignIn(
         scopes: ['email', 'profile'],
+        serverClientId: '230923681741-pjmi7c6l0g5fplo1a1melmvqcqbupsg3.apps.googleusercontent.com',
       );
 
       // Trigger the authentication flow
