@@ -34,7 +34,7 @@ class _MainScreenState extends State<MainScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     final authProvider = context.read<AuthProvider>();
-    _isLecturer = authProvider.currentUser?.role == 'lecturer';
+    _isLecturer = authProvider.user?.role == 'lecturer';
     
     _screens = [
       if (_isLecturer) const LecturerDashboardScreen(),

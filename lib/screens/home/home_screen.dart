@@ -37,7 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       final user = context.read<AuthProvider>().user;
       if (user?.role == 'lecturer') {
-        _projects = await LecturerService.getGroups();
+        _projects = [];
       } else {
         _orgs = await ProjectService.listOrgs();
         if (_orgs.isNotEmpty) {

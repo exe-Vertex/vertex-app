@@ -21,14 +21,14 @@ class LecturerTask {
 
   factory LecturerTask.fromJson(Map<String, dynamic> json) {
     return LecturerTask(
-      id: json['id'] ?? '',
-      title: json['title'] ?? '',
-      description: json['description'],
-      status: json['status'] ?? 'todo',
-      priority: json['priority'] ?? 'medium',
-      assigneeName: json['assigneeName'],
-      startDate: json['startDate'] ?? '',
-      endDate: json['endDate'] ?? '',
+      id: json['Id'] ?? json['id'] ?? '',
+      title: json['Title'] ?? json['title'] ?? '',
+      description: json['Description'] ?? json['description'],
+      status: json['Status'] ?? json['status'] ?? 'todo',
+      priority: json['Priority'] ?? json['priority'] ?? 'medium',
+      assigneeName: json['AssigneeName'] ?? json['assigneeName'],
+      startDate: json['StartDate'] ?? json['startDate'] ?? '',
+      endDate: json['EndDate'] ?? json['endDate'] ?? '',
     );
   }
 }
@@ -70,22 +70,22 @@ class LecturerGroup {
 
   factory LecturerGroup.fromJson(Map<String, dynamic> json) {
     return LecturerGroup(
-      id: json['id'] ?? '',
-      name: json['name'] ?? '',
-      description: json['description'] ?? '',
-      organizationName: json['organizationName'] ?? '',
-      deadline: json['deadline'] ?? '',
-      memberCount: json['memberCount'] ?? 0,
-      initials: (json['initials'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
-      progress: json['progress'] ?? 0,
-      reviewStatus: json['reviewStatus'] ?? 'on_track',
-      totalTasks: json['totalTasks'] ?? 0,
-      approvedTasks: json['approvedTasks'] ?? 0,
-      inReviewTasks: json['inReviewTasks'] ?? 0,
-      inProgressTasks: json['inProgressTasks'] ?? 0,
-      todoTasks: json['todoTasks'] ?? 0,
-      reviewTasks: (json['reviewTasks'] as List<dynamic>?)
-              ?.map((e) => LecturerTask.fromJson(e))
+      id: json['projectId'] ?? json['Id'] ?? json['id'] ?? '',
+      name: json['projectName'] ?? json['Name'] ?? json['name'] ?? '',
+      description: json['projectDescription'] ?? json['Description'] ?? json['description'] ?? '',
+      organizationName: json['orgName'] ?? json['OrganizationName'] ?? json['organizationName'] ?? '',
+      deadline: json['deadline'] ?? json['Deadline'] ?? '',
+      memberCount: json['memberCount'] ?? json['MemberCount'] ?? 0,
+      initials: ((json['memberInitials'] ?? json['Initials'] ?? json['initials']) as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
+      progress: json['progress'] ?? json['Progress'] ?? 0,
+      reviewStatus: json['reviewStatus'] ?? json['ReviewStatus'] ?? 'on_track',
+      totalTasks: json['tasksTotal'] ?? json['TotalTasks'] ?? json['totalTasks'] ?? 0,
+      approvedTasks: json['tasksApproved'] ?? json['ApprovedTasks'] ?? json['approvedTasks'] ?? 0,
+      inReviewTasks: json['tasksInReview'] ?? json['InReviewTasks'] ?? json['inReviewTasks'] ?? 0,
+      inProgressTasks: json['tasksInProgress'] ?? json['InProgressTasks'] ?? json['inProgressTasks'] ?? 0,
+      todoTasks: json['tasksTodo'] ?? json['TodoTasks'] ?? json['todoTasks'] ?? 0,
+      reviewTasks: ((json['reviewTasks'] ?? json['ReviewTasks']) as List<dynamic>?)
+              ?.map((e) => LecturerTask.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
     );
@@ -113,13 +113,13 @@ class TaskCommentDto {
 
   factory TaskCommentDto.fromJson(Map<String, dynamic> json) {
     return TaskCommentDto(
-      id: json['id'] ?? '',
-      taskId: json['taskId'] ?? '',
-      userId: json['userId'] ?? '',
-      userName: json['userName'] ?? 'Unknown',
-      role: json['role'] ?? 'student',
-      content: json['content'] ?? '',
-      createdAt: json['createdAt'] ?? '',
+      id: json['Id'] ?? json['id'] ?? '',
+      taskId: json['TaskId'] ?? json['taskId'] ?? '',
+      userId: json['UserId'] ?? json['userId'] ?? '',
+      userName: json['UserName'] ?? json['userName'] ?? 'Unknown',
+      role: json['Role'] ?? json['role'] ?? 'student',
+      content: json['Content'] ?? json['content'] ?? '',
+      createdAt: json['CreatedAt'] ?? json['createdAt'] ?? '',
     );
   }
 }
@@ -155,18 +155,18 @@ class LecturerGroupDetail {
 
   factory LecturerGroupDetail.fromJson(Map<String, dynamic> json) {
     return LecturerGroupDetail(
-      id: json['id'] ?? '',
-      name: json['name'] ?? '',
-      description: json['description'] ?? '',
-      organizationName: json['organizationName'] ?? '',
-      deadline: json['deadline'] ?? '',
-      memberCount: json['memberCount'] ?? 0,
-      memberNames: (json['memberNames'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
-      progress: json['progress'] ?? 0,
-      reviewStatus: json['reviewStatus'] ?? 'on_track',
-      tasks: (json['tasks'] as List<dynamic>?)?.map((e) => LecturerTask.fromJson(e)).toList() ?? [],
-      comments: (json['comments'] as List<dynamic>?)?.map((e) => TaskCommentDto.fromJson(e)).toList() ?? [],
-      contributions: json['contributions'] ?? [],
+      id: json['projectId'] ?? json['Id'] ?? json['id'] ?? '',
+      name: json['projectName'] ?? json['Name'] ?? json['name'] ?? '',
+      description: json['projectDescription'] ?? json['Description'] ?? json['description'] ?? '',
+      organizationName: json['orgName'] ?? json['OrganizationName'] ?? json['organizationName'] ?? '',
+      deadline: json['deadline'] ?? json['Deadline'] ?? '',
+      memberCount: json['memberCount'] ?? json['MemberCount'] ?? 0,
+      memberNames: ((json['memberNames'] ?? json['MemberNames']) as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
+      progress: json['progress'] ?? json['Progress'] ?? 0,
+      reviewStatus: json['reviewStatus'] ?? json['ReviewStatus'] ?? 'on_track',
+      tasks: ((json['tasks'] ?? json['Tasks']) as List<dynamic>?)?.map((e) => LecturerTask.fromJson(e as Map<String, dynamic>)).toList() ?? [],
+      comments: ((json['comments'] ?? json['Comments']) as List<dynamic>?)?.map((e) => TaskCommentDto.fromJson(e as Map<String, dynamic>)).toList() ?? [],
+      contributions: json['contributions'] ?? json['Contributions'] ?? [],
     );
   }
 }

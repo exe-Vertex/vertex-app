@@ -50,7 +50,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen>
     try {
       final user = context.read<AuthProvider>().user;
       if (user?.role == 'lecturer') {
-        _project = await LecturerService.getGroupDetail(widget.projectId);
+        _project = null;
       } else {
         _project = await ProjectService.getProjectDetail(
             widget.orgId, widget.projectId);
